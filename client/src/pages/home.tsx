@@ -10,6 +10,7 @@ import { ContactForm } from "@/components/contact-form";
 import { EditableContent } from "@/components/editable-content";
 import { AuthModal } from "@/components/auth-modal";
 import { GalleryAdminControls } from "@/components/gallery-admin-controls";
+import { FirebaseStatus } from "@/components/firebase-status";
 import { useAdmin } from "@/hooks/use-admin";
 import { GalleryItem, Service } from "@shared/schema";
 import { Search, Settings, LogOut, Trash2 } from "lucide-react";
@@ -144,41 +145,43 @@ export default function Home() {
                 <EditableContent id="nav-contact" defaultContent="Контакты" />
               </button>
               
-              {/* Admin Controls */}
-              {!isAdmin ? (
-                <Button
-                  onClick={() => setShowAuthModal(true)}
-                  variant="outline"
-                  size="sm"
-                  className="ml-4"
-                  data-testid="admin-login-btn"
-                >
-                  <Settings className="h-4 w-4 mr-2" />
-                  Админ
-                </Button>
-              ) : (
-                <div className="flex items-center space-x-2 ml-4">
-                  <Link href="/admin">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      data-testid="admin-panel-btn"
-                    >
-                      <Settings className="h-4 w-4 mr-2" />
-                      Админ панель
-                    </Button>
-                  </Link>
+              {/* Firebase Status & Admin Controls */}
+              <div className="flex items-center space-x-2 ml-4">
+                <FirebaseStatus />
+                {!isAdmin ? (
                   <Button
-                    onClick={signOut}
+                    onClick={() => setShowAuthModal(true)}
                     variant="outline"
                     size="sm"
-                    data-testid="admin-logout-btn"
+                    data-testid="admin-login-btn"
                   >
-                    <LogOut className="h-4 w-4 mr-2" />
-                    Выйти
+                    <Settings className="h-4 w-4 mr-2" />
+                    Админ
                   </Button>
-                </div>
-              )}
+                ) : (
+                  <div className="flex items-center space-x-2">
+                    <Link href="/admin">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        data-testid="admin-panel-btn"
+                      >
+                        <Settings className="h-4 w-4 mr-2" />
+                        Админ панель
+                      </Button>
+                    </Link>
+                    <Button
+                      onClick={signOut}
+                      variant="outline"
+                      size="sm"
+                      data-testid="admin-logout-btn"
+                    >
+                      <LogOut className="h-4 w-4 mr-2" />
+                      Выйти
+                    </Button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>

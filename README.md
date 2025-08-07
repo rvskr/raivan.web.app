@@ -33,16 +33,36 @@
 3. Перезапустите приложение
 4. Войдите как админ: `admin@example.com` / `admin123`
 
-### Локально
+### Локально (Windows)
+```bash
+# Клонируйте или скачайте проект
+git clone [ваш-репозиторий]
+cd restoration-gallery
+
+# Установите зависимости
+npm install
+
+# Создайте .env файл с ключами Firebase
+echo VITE_FIREBASE_API_KEY=ваш_ключ > .env
+echo VITE_FIREBASE_PROJECT_ID=ваш_проект_id >> .env  
+echo VITE_FIREBASE_APP_ID=ваш_app_id >> .env
+
+# Запустите (используйте cross-env для Windows)
+npx cross-env NODE_ENV=development tsx server/index.ts
+# ИЛИ просто
+start-windows.bat
+```
+
+### Локально (Mac/Linux)
 ```bash
 git clone [ваш-репозиторий]
 cd restoration-gallery
 npm install
 
-# Создайте .env.local с ключами Firebase
-echo "VITE_FIREBASE_API_KEY=ваш_ключ" > .env.local
-echo "VITE_FIREBASE_PROJECT_ID=ваш_проект_id" >> .env.local  
-echo "VITE_FIREBASE_APP_ID=ваш_app_id" >> .env.local
+# Создайте .env файл
+echo "VITE_FIREBASE_API_KEY=ваш_ключ" > .env
+echo "VITE_FIREBASE_PROJECT_ID=ваш_проект_id" >> .env  
+echo "VITE_FIREBASE_APP_ID=ваш_app_id" >> .env
 
 npm run dev
 ```
