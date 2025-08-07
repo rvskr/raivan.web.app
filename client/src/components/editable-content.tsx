@@ -72,11 +72,17 @@ export function EditableContent({
 
   return (
     <Tag
-      className={`${className} ${isAdmin ? 'cursor-pointer hover:bg-yellow-100 hover:outline-2 hover:outline-dashed hover:outline-primary' : ''}`}
+      className={`${className} ${isAdmin ? 'cursor-pointer hover:bg-yellow-100 hover:outline-2 hover:outline-dashed hover:outline-yellow-500 relative transition-all duration-200' : ''} ${isAdmin ? 'outline-1 outline-dashed outline-yellow-300/50' : ''}`}
       onClick={handleEdit}
       data-testid={`editable-${id}`}
+      title={isAdmin ? "Кликните для редактирования" : undefined}
     >
       {children || content}
+      {isAdmin && (
+        <span className="absolute -top-2 -right-2 bg-yellow-500 text-white text-xs px-1 rounded opacity-0 hover:opacity-100 transition-opacity">
+          ✏️
+        </span>
+      )}
     </Tag>
   );
 }

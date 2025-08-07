@@ -6,12 +6,13 @@ import { GalleryModal } from "@/components/gallery-modal";
 import { GalleryFilter } from "@/components/gallery-filter";
 import { ContactForm } from "@/components/contact-form";
 import { EditableContent } from "@/components/editable-content";
+import { AuthModal } from "@/components/auth-modal";
 import { useAdmin } from "@/hooks/use-admin";
 import { GalleryItem } from "@shared/schema";
-import { Search } from "lucide-react";
+import { Search, Settings, LogOut } from "lucide-react";
 
 export default function Home() {
-  const { isAdmin } = useAdmin();
+  const { isAdmin, signOut } = useAdmin();
   const [galleryItems, setGalleryItems] = useState<GalleryItem[]>([]);
   const [activeFilter, setActiveFilter] = useState("all");
   const [selectedImage, setSelectedImage] = useState<{
@@ -21,6 +22,7 @@ export default function Home() {
     description: string;
   } | null>(null);
   const [isGalleryModalOpen, setIsGalleryModalOpen] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onSnapshot(
@@ -63,9 +65,12 @@ export default function Home() {
     <div className="min-h-screen bg-neutral text-dark">
       {/* Admin Toggle */}
       {isAdmin && (
-        <div className="fixed top-4 right-4 z-50">
-          <div className="bg-primary text-white px-4 py-2 rounded-lg shadow-lg">
-            <span className="text-sm">Admin Mode Active</span>
+        <div className="fixed top-4 right-4 z-50 space-y-2">
+          <div className="bg-green-600 text-white px-4 py-3 rounded-lg shadow-lg max-w-sm">
+            <div className="text-sm font-semibold mb-1">🎨 Режим редактирования</div>
+            <div className="text-xs">
+              Кликните по любому тексту или кнопке с желтой рамкой для редактирования
+            </div>
           </div>
         </div>
       )}
@@ -82,7 +87,7 @@ export default function Home() {
                 tag="h1"
               />
             </div>
-            <div className="hidden md:flex space-x-8">
+            <div className="hidden md:flex space-x-8 items-center">
               <button 
                 onClick={() => scrollToSection("hero")}
                 className="text-dark hover:text-primary transition-colors"
@@ -118,6 +123,35 @@ export default function Home() {
               >
                 <EditableContent id="nav-contact" defaultContent="Контакты" />
               </button>
+              
+              {/* Admin Controls */}
+              {!isAdmin ? (
+                <Button
+                  onClick={() => setShowAuthModal(true)}
+                  variant="outline"
+                  size="sm"
+                  className="ml-4"
+                  data-testid="admin-login-btn"
+                >
+                  <Settings className="h-4 w-4 mr-2" />
+                  Админ
+                </Button>
+              ) : (
+                <div className="flex items-center space-x-2 ml-4">
+                  <div className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
+                    Режим редактирования
+                  </div>
+                  <Button
+                    onClick={signOut}
+                    variant="outline"
+                    size="sm"
+                    data-testid="admin-logout-btn"
+                  >
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Выйти
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -603,6 +637,11 @@ export default function Home() {
         open={isGalleryModalOpen}
         onOpenChange={setIsGalleryModalOpen}
         image={selectedImage}
+      />
+      
+      <AuthModal 
+        open={showAuthModal} 
+        onOpenChange={setShowAuthModal}
       />
     </div>
   );
