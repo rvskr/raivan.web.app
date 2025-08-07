@@ -145,43 +145,41 @@ export default function Home() {
                 <EditableContent id="nav-contact" defaultContent="Контакты" />
               </button>
               
-              {/* Firebase Status & Admin Controls */}
-              <div className="flex items-center space-x-2 ml-4">
-                <FirebaseStatus />
-                {!isAdmin ? (
-                  <Button
-                    onClick={() => setShowAuthModal(true)}
-                    variant="outline"
-                    size="sm"
-                    data-testid="admin-login-btn"
-                  >
-                    <Settings className="h-4 w-4 mr-2" />
-                    Админ
-                  </Button>
-                ) : (
-                  <div className="flex items-center space-x-2">
-                    <Link href="/admin">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        data-testid="admin-panel-btn"
-                      >
-                        <Settings className="h-4 w-4 mr-2" />
-                        Админ панель
-                      </Button>
-                    </Link>
+              {/* Admin Controls - только для админов */}
+              {isAdmin && (
+                <div className="flex items-center space-x-2 ml-4">
+                  <Link href="/admin">
                     <Button
-                      onClick={signOut}
                       variant="outline"
                       size="sm"
-                      data-testid="admin-logout-btn"
+                      data-testid="admin-panel-btn"
                     >
-                      <LogOut className="h-4 w-4 mr-2" />
-                      Выйти
+                      <Settings className="h-4 w-4 mr-2" />
+                      Админ панель
                     </Button>
-                  </div>
-                )}
-              </div>
+                  </Link>
+                  <Button
+                    onClick={signOut}
+                    variant="outline"
+                    size="sm"
+                    data-testid="admin-logout-btn"
+                  >
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Выйти
+                  </Button>
+                </div>
+              )}
+              
+              {/* Скрытый доступ к админке - двойной клик на логотип */}
+              {!isAdmin && (
+                <div 
+                  onDoubleClick={() => setShowAuthModal(true)}
+                  className="cursor-pointer ml-4"
+                  title="Двойной клик для входа в админ панель"
+                >
+                  <div className="w-2 h-2 rounded-full bg-gray-400 dark:bg-gray-600 opacity-50 hover:opacity-100 transition-opacity"></div>
+                </div>
+              )}
             </div>
           </div>
         </div>
