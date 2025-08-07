@@ -15,10 +15,11 @@ function Router() {
   const [showAuthModal, setShowAuthModal] = useState(false);
 
   useEffect(() => {
-    // Show auth modal after initial load if not admin
-    if (!isLoading && !isAdmin) {
+    // Show auth modal after initial load if not admin (only once)
+    if (!isLoading && !isAdmin && !localStorage.getItem('modalShown')) {
       const timer = setTimeout(() => {
         setShowAuthModal(true);
+        localStorage.setItem('modalShown', 'true');
       }, 2000);
       return () => clearTimeout(timer);
     }

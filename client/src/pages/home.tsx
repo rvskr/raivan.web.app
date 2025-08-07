@@ -1,18 +1,21 @@
 import { useState, useEffect } from "react";
-import { collection, onSnapshot, query, orderBy } from "firebase/firestore";
+import { collection, onSnapshot, query, orderBy, deleteDoc, doc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { GalleryModal } from "@/components/gallery-modal";
 import { GalleryFilter } from "@/components/gallery-filter";
 import { ContactForm } from "@/components/contact-form";
 import { EditableContent } from "@/components/editable-content";
 import { AuthModal } from "@/components/auth-modal";
+import { GalleryAdminControls } from "@/components/gallery-admin-controls";
 import { useAdmin } from "@/hooks/use-admin";
 import { GalleryItem } from "@shared/schema";
-import { Search, Settings, LogOut } from "lucide-react";
+import { Search, Settings, LogOut, Trash2 } from "lucide-react";
 
 export default function Home() {
   const { isAdmin, signOut } = useAdmin();
+  const { toast } = useToast();
   const [galleryItems, setGalleryItems] = useState<GalleryItem[]>([]);
   const [activeFilter, setActiveFilter] = useState("all");
   const [selectedImage, setSelectedImage] = useState<{
@@ -65,12 +68,9 @@ export default function Home() {
     <div className="min-h-screen bg-neutral text-dark">
       {/* Admin Toggle */}
       {isAdmin && (
-        <div className="fixed top-4 right-4 z-50 space-y-2">
-          <div className="bg-green-600 text-white px-4 py-3 rounded-lg shadow-lg max-w-sm">
-            <div className="text-sm font-semibold mb-1">🎨 Режим редактирования</div>
-            <div className="text-xs">
-              Кликните по любому тексту или кнопке с желтой рамкой для редактирования
-            </div>
+        <div className="fixed top-4 left-4 z-50">
+          <div className="bg-green-600 text-white px-3 py-2 rounded-lg shadow-lg text-xs">
+            Режим редактирования активен
           </div>
         </div>
       )}
@@ -311,32 +311,79 @@ export default function Home() {
 
           <GalleryFilter activeFilter={activeFilter} onFilterChange={setActiveFilter} />
 
+          {/* Admin Gallery Controls */}
+          {isAdmin && (
+            <div className="mb-8 max-w-md mx-auto">
+              <GalleryAdminControls 
+                galleryItems={galleryItems}
+                onItemAdded={() => {
+                  // Items will auto-refresh via Firebase listener
+                }}
+                onItemDeleted={() => {
+                  // Items will auto-refresh via Firebase listener
+                }}
+              />
+            </div>
+          )}
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" data-testid="gallery-grid">
             {filteredGalleryItems.map((item) => (
               <div
                 key={item.id}
-                className="group cursor-pointer"
-                onClick={() => handleGalleryItemClick(item)}
+                className="group relative"
                 data-testid={`gallery-item-${item.id}`}
               >
-                <div className="relative overflow-hidden rounded-xl">
-                  <img
-                    src={item.imageUrl}
-                    alt={item.title}
-                    className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-300"
-                    data-testid={`gallery-image-${item.id}`}
-                  />
-                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-300 flex items-center justify-center">
-                    <Search className="text-white text-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                {/* Admin Delete Button */}
+                {isAdmin && (
+                  <button
+                    onClick={async (e) => {
+                      e.stopPropagation();
+                      if (confirm(`Удалить работу "${item.title}"?`)) {
+                        try {
+                          await deleteDoc(doc(db, "gallery", item.id));
+                          toast({
+                            title: "Успех",
+                            description: "Работа удалена",
+                          });
+                        } catch (error) {
+                          toast({
+                            title: "Ошибка",
+                            description: "Не удалось удалить работу",
+                            variant: "destructive",
+                          });
+                        }
+                      }
+                    }}
+                    className="absolute top-2 right-2 z-10 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition-colors shadow-lg"
+                    data-testid={`delete-gallery-${item.id}`}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                )}
+                
+                <div
+                  className="cursor-pointer"
+                  onClick={() => handleGalleryItemClick(item)}
+                >
+                  <div className="relative overflow-hidden rounded-xl">
+                    <img
+                      src={item.imageUrl}
+                      alt={item.title}
+                      className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-300"
+                      data-testid={`gallery-image-${item.id}`}
+                    />
+                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-300 flex items-center justify-center">
+                      <Search className="text-white text-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    </div>
                   </div>
-                </div>
-                <div className="mt-4">
-                  <h3 className="text-lg font-semibold mb-2" data-testid={`gallery-title-${item.id}`}>
-                    {item.title}
-                  </h3>
-                  <p className="text-gray-600" data-testid={`gallery-desc-${item.id}`}>
-                    {item.description}
-                  </p>
+                  <div className="mt-4">
+                    <h3 className="text-lg font-semibold mb-2" data-testid={`gallery-title-${item.id}`}>
+                      {item.title}
+                    </h3>
+                    <p className="text-gray-600" data-testid={`gallery-desc-${item.id}`}>
+                      {item.description}
+                    </p>
+                  </div>
                 </div>
               </div>
             ))}
