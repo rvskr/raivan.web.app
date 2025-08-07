@@ -1,0 +1,144 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&family=Dancing+Script:wght@400;600&display=swap');
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: hsl(0 0% 100%);
+  --foreground: hsl(47 15% 11%);
+  --card: hsl(46 25% 97%);
+  --card-foreground: hsl(47 15% 11%);
+  --popover: hsl(0 0% 100%);
+  --popover-foreground: hsl(47 15% 11%);
+  --primary: hsl(25 67% 27%);
+  --primary-foreground: hsl(0 0% 100%);
+  --secondary: hsl(26 82% 46%);
+  --secondary-foreground: hsl(0 0% 100%);
+  --accent: hsl(45 87% 45%);
+  --accent-foreground: hsl(47 15% 11%);
+  --muted: hsl(46 25% 94%);
+  --muted-foreground: hsl(47 15% 11%);
+  --destructive: hsl(0 84% 60%);
+  --destructive-foreground: hsl(0 0% 100%);
+  --border: hsl(45 30% 85%);
+  --input: hsl(45 30% 92%);
+  --ring: hsl(25 67% 27%);
+  --neutral: hsl(60 9% 96%);
+  --dark: hsl(0 0% 18%);
+  
+  /* Fonts */
+  --font-display: 'Playfair Display', serif;
+  --font-body: 'Inter', sans-serif;
+  --font-script: 'Dancing Script', cursive;
+  --font-sans: 'Inter', sans-serif;
+  --font-serif: 'Playfair Display', serif;
+  --font-mono: 'Menlo', monospace;
+  
+  --radius: 0.75rem;
+}
+
+.dark {
+  --background: hsl(0 0% 0%);
+  --foreground: hsl(46 25% 97%);
+  --card: hsl(47 15% 11%);
+  --card-foreground: hsl(46 25% 97%);
+  --popover: hsl(0 0% 0%);
+  --popover-foreground: hsl(46 25% 97%);
+  --primary: hsl(25 67% 35%);
+  --primary-foreground: hsl(0 0% 100%);
+  --secondary: hsl(26 82% 54%);
+  --secondary-foreground: hsl(0 0% 100%);
+  --accent: hsl(45 87% 55%);
+  --accent-foreground: hsl(47 15% 11%);
+  --muted: hsl(47 15% 15%);
+  --muted-foreground: hsl(46 25% 85%);
+  --destructive: hsl(0 84% 60%);
+  --destructive-foreground: hsl(0 0% 100%);
+  --border: hsl(47 15% 20%);
+  --input: hsl(47 15% 18%);
+  --ring: hsl(25 67% 35%);
+  --neutral: hsl(47 15% 11%);
+  --dark: hsl(0 0% 95%);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-body antialiased bg-background text-foreground;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  .font-display {
+    font-family: var(--font-display);
+  }
+
+  .font-body {
+    font-family: var(--font-body);
+  }
+
+  .font-script {
+    font-family: var(--font-script);
+  }
+}
+
+@layer utilities {
+  .text-primary {
+    color: var(--primary);
+  }
+
+  .text-secondary {
+    color: var(--secondary);
+  }
+
+  .text-accent {
+    color: var(--accent);
+  }
+
+  .text-neutral {
+    color: var(--neutral);
+  }
+
+  .text-dark {
+    color: var(--dark);
+  }
+
+  .bg-primary {
+    background-color: var(--primary);
+  }
+
+  .bg-secondary {
+    background-color: var(--secondary);
+  }
+
+  .bg-accent {
+    background-color: var(--accent);
+  }
+
+  .bg-neutral {
+    background-color: var(--neutral);
+  }
+
+  .bg-dark {
+    background-color: var(--dark);
+  }
+
+  .border-primary {
+    border-color: var(--primary);
+  }
+
+  .hover\:bg-primary\/90:hover {
+    background-color: hsl(from var(--primary) h s l / 0.9);
+  }
+
+  .hover\:bg-opacity-90:hover {
+    background-color: hsl(from var(--primary) h s l / 0.9);
+  }
+}
