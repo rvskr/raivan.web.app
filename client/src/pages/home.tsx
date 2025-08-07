@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { collection, onSnapshot, query, orderBy, deleteDoc, doc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
+import * as LucideIcons from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { GalleryModal } from "@/components/gallery-modal";
 import { GalleryFilter } from "@/components/gallery-filter";
@@ -10,13 +11,15 @@ import { EditableContent } from "@/components/editable-content";
 import { AuthModal } from "@/components/auth-modal";
 import { GalleryAdminControls } from "@/components/gallery-admin-controls";
 import { useAdmin } from "@/hooks/use-admin";
-import { GalleryItem } from "@shared/schema";
+import { GalleryItem, Service } from "@shared/schema";
 import { Search, Settings, LogOut, Trash2 } from "lucide-react";
+import { Link } from "wouter";
 
 export default function Home() {
   const { isAdmin, signOut } = useAdmin();
   const { toast } = useToast();
   const [galleryItems, setGalleryItems] = useState<GalleryItem[]>([]);
+  const [services, setServices] = useState<Service[]>([]);
   const [activeFilter, setActiveFilter] = useState("all");
   const [selectedImage, setSelectedImage] = useState<{
     src: string;
@@ -27,6 +30,7 @@ export default function Home() {
   const [isGalleryModalOpen, setIsGalleryModalOpen] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
 
+  // Load gallery items from Firebase
   useEffect(() => {
     const unsubscribe = onSnapshot(
       query(collection(db, "gallery"), orderBy("order", "asc")),
@@ -36,6 +40,22 @@ export default function Home() {
           items.push({ id: doc.id, ...doc.data() } as GalleryItem);
         });
         setGalleryItems(items);
+      }
+    );
+
+    return unsubscribe;
+  }, []);
+
+  // Load services from Firebase
+  useEffect(() => {
+    const unsubscribe = onSnapshot(
+      query(collection(db, "services"), orderBy("order", "asc")),
+      (snapshot) => {
+        const items: Service[] = [];
+        snapshot.forEach((doc) => {
+          items.push({ id: doc.id, ...doc.data() } as Service);
+        });
+        setServices(items);
       }
     );
 
@@ -138,9 +158,16 @@ export default function Home() {
                 </Button>
               ) : (
                 <div className="flex items-center space-x-2 ml-4">
-                  <div className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
-                    Режим редактирования
-                  </div>
+                  <Link href="/admin">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      data-testid="admin-panel-btn"
+                    >
+                      <Settings className="h-4 w-4 mr-2" />
+                      Админ панель
+                    </Button>
+                  </Link>
                   <Button
                     onClick={signOut}
                     variant="outline"
@@ -222,71 +249,99 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* Service 1 */}
-            <div className="bg-neutral p-8 rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-2" data-testid="service-1">
-              <div className="text-center mb-6">
-                <i className="fas fa-hammer text-5xl text-accent mb-4"></i>
-                <EditableContent
-                  id="service-1-title"
-                  defaultContent="Реставрация мебели"
-                  className="text-2xl font-display font-semibold mb-4"
-                  tag="h3"
-                />
-              </div>
-              <EditableContent
-                id="service-1-desc"
-                defaultContent="Профессиональное восстановление антикварной и винтажной мебели с сохранением исторической ценности"
-                className="text-gray-700 mb-6 leading-relaxed"
-                tag="p"
-              />
-              <Button className="w-full bg-primary text-white hover:bg-primary/90" data-testid="service-1-cta">
-                <EditableContent id="service-1-cta" defaultContent="Подробнее" />
-              </Button>
-            </div>
+            {services.length > 0 ? services.map((service, index) => {
+              const IconComponent = (LucideIcons as any)[service.icon] || LucideIcons.Hammer;
+              
+              return (
+                <div 
+                  key={service.id} 
+                  className="bg-neutral p-8 rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-2" 
+                  data-testid={`service-${index + 1}`}
+                >
+                  <div className="text-center mb-6">
+                    <IconComponent className="h-12 w-12 text-accent mb-4 mx-auto" />
+                    <h3 className="text-2xl font-display font-semibold mb-4">
+                      {service.title}
+                    </h3>
+                  </div>
+                  <p className="text-gray-700 mb-6 leading-relaxed">
+                    {service.description}
+                  </p>
+                  <Button 
+                    className="w-full bg-primary text-white hover:bg-primary/90" 
+                    data-testid={`service-${index + 1}-cta`}
+                  >
+                    Подробнее
+                  </Button>
+                </div>
+              );
+            }) : (
+              <>
+                {/* Fallback services when Firebase is not connected */}
+                <div className="bg-neutral p-8 rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-2" data-testid="service-1">
+                  <div className="text-center mb-6">
+                    <LucideIcons.Hammer className="h-12 w-12 text-accent mb-4 mx-auto" />
+                    <EditableContent
+                      id="service-1-title"
+                      defaultContent="Реставрация мебели"
+                      className="text-2xl font-display font-semibold mb-4"
+                      tag="h3"
+                    />
+                  </div>
+                  <EditableContent
+                    id="service-1-desc"
+                    defaultContent="Профессиональное восстановление антикварной и винтажной мебели с сохранением исторической ценности"
+                    className="text-gray-700 mb-6 leading-relaxed"
+                    tag="p"
+                  />
+                  <Button className="w-full bg-primary text-white hover:bg-primary/90" data-testid="service-1-cta">
+                    <EditableContent id="service-1-cta" defaultContent="Подробнее" />
+                  </Button>
+                </div>
 
-            {/* Service 2 */}
-            <div className="bg-neutral p-8 rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-2" data-testid="service-2">
-              <div className="text-center mb-6">
-                <i className="fas fa-palette text-5xl text-accent mb-4"></i>
-                <EditableContent
-                  id="service-2-title"
-                  defaultContent="Художественная отделка"
-                  className="text-2xl font-display font-semibold mb-4"
-                  tag="h3"
-                />
-              </div>
-              <EditableContent
-                id="service-2-desc"
-                defaultContent="Создание уникальных художественных решений: роспись, патина, позолота и декоративные техники"
-                className="text-gray-700 mb-6 leading-relaxed"
-                tag="p"
-              />
-              <Button className="w-full bg-primary text-white hover:bg-primary/90" data-testid="service-2-cta">
-                <EditableContent id="service-2-cta" defaultContent="Подробнее" />
-              </Button>
-            </div>
+                <div className="bg-neutral p-8 rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-2" data-testid="service-2">
+                  <div className="text-center mb-6">
+                    <LucideIcons.Palette className="h-12 w-12 text-accent mb-4 mx-auto" />
+                    <EditableContent
+                      id="service-2-title"
+                      defaultContent="Художественная отделка"
+                      className="text-2xl font-display font-semibold mb-4"
+                      tag="h3"
+                    />
+                  </div>
+                  <EditableContent
+                    id="service-2-desc"
+                    defaultContent="Создание уникальных художественных решений: роспись, патина, позолота и декоративные техники"
+                    className="text-gray-700 mb-6 leading-relaxed"
+                    tag="p"
+                  />
+                  <Button className="w-full bg-primary text-white hover:bg-primary/90" data-testid="service-2-cta">
+                    <EditableContent id="service-2-cta" defaultContent="Подробнее" />
+                  </Button>
+                </div>
 
-            {/* Service 3 */}
-            <div className="bg-neutral p-8 rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-2" data-testid="service-3">
-              <div className="text-center mb-6">
-                <i className="fas fa-tools text-5xl text-accent mb-4"></i>
-                <EditableContent
-                  id="service-3-title"
-                  defaultContent="Изготовление на заказ"
-                  className="text-2xl font-display font-semibold mb-4"
-                  tag="h3"
-                />
-              </div>
-              <EditableContent
-                id="service-3-desc"
-                defaultContent="Создание эксклюзивной мебели и арт-объектов по индивидуальным проектам и пожеланиям"
-                className="text-gray-700 mb-6 leading-relaxed"
-                tag="p"
-              />
-              <Button className="w-full bg-primary text-white hover:bg-primary/90" data-testid="service-3-cta">
-                <EditableContent id="service-3-cta" defaultContent="Подробнее" />
-              </Button>
-            </div>
+                <div className="bg-neutral p-8 rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-2" data-testid="service-3">
+                  <div className="text-center mb-6">
+                    <LucideIcons.Wrench className="h-12 w-12 text-accent mb-4 mx-auto" />
+                    <EditableContent
+                      id="service-3-title"
+                      defaultContent="Изготовление на заказ"
+                      className="text-2xl font-display font-semibold mb-4"
+                      tag="h3"
+                    />
+                  </div>
+                  <EditableContent
+                    id="service-3-desc"
+                    defaultContent="Создание эксклюзивной мебели и арт-объектов по индивидуальным проектам и пожеланиям"
+                    className="text-gray-700 mb-6 leading-relaxed"
+                    tag="p"
+                  />
+                  <Button className="w-full bg-primary text-white hover:bg-primary/90" data-testid="service-3-cta">
+                    <EditableContent id="service-3-cta" defaultContent="Подробнее" />
+                  </Button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </section>

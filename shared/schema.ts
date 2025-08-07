@@ -34,6 +34,17 @@ export const serviceSchema = z.object({
 
 export const insertServiceSchema = serviceSchema.omit({ id: true });
 
+// Category Schema
+export const categorySchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  slug: z.string(),
+  order: z.number().default(0),
+  createdAt: z.date().optional(),
+});
+
+export const insertCategorySchema = categorySchema.omit({ id: true, createdAt: true });
+
 // Contact Form Schema
 export const contactFormSchema = z.object({
   id: z.string(),
@@ -59,6 +70,8 @@ export const insertUserSchema = userSchema.omit({ id: true });
 // Types
 export type Content = z.infer<typeof contentSchema>;
 export type InsertContent = z.infer<typeof insertContentSchema>;
+export type Category = z.infer<typeof categorySchema>;
+export type InsertCategory = z.infer<typeof insertCategorySchema>;
 export type GalleryItem = z.infer<typeof galleryItemSchema>;
 export type InsertGalleryItem = z.infer<typeof insertGalleryItemSchema>;
 export type Service = z.infer<typeof serviceSchema>;
