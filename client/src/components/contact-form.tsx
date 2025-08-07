@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { collection, addDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
@@ -7,8 +7,19 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { useEditableContent } from "@/hooks/use-editable-content";
+import { EditableContent } from "@/components/editable-content";
+import { useAdmin } from "@/hooks/use-admin";
+import { Service, ContactFormContent } from "@shared/schema";
 
-export function ContactForm() {
+interface ContactFormProps {
+  services: Service[];
+}
+
+export function ContactForm({ services }: ContactFormProps) {
+  const { isAdmin } = useAdmin();
+  const [isEditingMode, setIsEditingMode] = useState(isAdmin);
+  const formContent = useEditableContent("contact-form") as ContactFormContent;
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -18,6 +29,17 @@ export function ContactForm() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+
+  // Automatically select the first service when services are available
+  useEffect(() => {
+    if (!formData.service && services.length > 0) {
+      setFormData((prev) => ({ ...prev, service: services[0].id }));
+    }
+  }, [services, formData.service]);
+
+  useEffect(() => {
+    setIsEditingMode(isAdmin);
+  }, [isAdmin]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,7 +60,7 @@ export function ContactForm() {
         name: "",
         email: "",
         phone: "",
-        service: "",
+        service: services.length > 0 ? services[0].id : "", // Reset to first service
         message: "",
       });
     } catch (error) {
@@ -54,12 +76,23 @@ export function ContactForm() {
 
   return (
     <div className="bg-white p-8 rounded-xl shadow-lg">
-      <h3 className="text-2xl font-display font-semibold mb-6" data-testid="form-title">
-        Отправьте заявку
-      </h3>
+      <EditableContent
+        id="contact-form-title"
+        defaultContent="Отправьте заявку"
+        className="text-2xl font-display font-semibold mb-6"
+        tag="h3"
+        isEditable={isEditingMode}
+      />
       <form onSubmit={handleSubmit} className="space-y-6" data-testid="contact-form">
         <div>
-          <Label htmlFor="name">Имя *</Label>
+          <Label htmlFor="name">
+            <EditableContent
+              id="contact-form-nameLabel"
+              defaultContent="Имя *"
+              tag="span"
+              isEditable={isEditingMode}
+            />
+          </Label>
           <Input
             id="name"
             type="text"
@@ -70,7 +103,14 @@ export function ContactForm() {
           />
         </div>
         <div>
-          <Label htmlFor="email">Email *</Label>
+          <Label htmlFor="email">
+            <EditableContent
+              id="contact-form-emailLabel"
+              defaultContent="Email *"
+              tag="span"
+              isEditable={isEditingMode}
+            />
+          </Label>
           <Input
             id="email"
             type="email"
@@ -81,7 +121,14 @@ export function ContactForm() {
           />
         </div>
         <div>
-          <Label htmlFor="phone">Телефон</Label>
+          <Label htmlFor="phone">
+            <EditableContent
+              id="contact-form-phoneLabel"
+              defaultContent="Телефон"
+              tag="span"
+              isEditable={isEditingMode}
+            />
+          </Label>
           <Input
             id="phone"
             type="tel"
@@ -91,41 +138,71 @@ export function ContactForm() {
           />
         </div>
         <div>
-          <Label htmlFor="service">Тип услуги</Label>
+          <Label htmlFor="service">
+            <EditableContent
+              id="contact-form-serviceLabel"
+              defaultContent="Тип услуги"
+              tag="span"
+              isEditable={isEditingMode}
+            />
+          </Label>
           <Select
             value={formData.service}
             onValueChange={(value) => setFormData({ ...formData, service: value })}
+            disabled={services.length === 0}
           >
             <SelectTrigger data-testid="select-service">
-              <SelectValue placeholder="Выберите услугу" />
+              <SelectValue
+                placeholder={
+                  <EditableContent
+                    id="contact-form-servicePlaceholder"
+                    defaultContent="Выберите услугу"
+                    tag="span"
+                    isEditable={isEditingMode}
+                  />
+                }
+              />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="restoration">Реставрация мебели</SelectItem>
-              <SelectItem value="art">Художественная отделка</SelectItem>
-              <SelectItem value="custom">Изготовление на заказ</SelectItem>
-              <SelectItem value="consultation">Консультация</SelectItem>
+              {services.map((service) => (
+                <SelectItem key={service.id} value={service.id}>
+                  {service.title}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
         <div>
-          <Label htmlFor="message">Сообщение *</Label>
+          <Label htmlFor="message">
+            <EditableContent
+              id="contact-form-messageLabel"
+              defaultContent="Сообщение *"
+              tag="span"
+              isEditable={isEditingMode}
+            />
+          </Label>
           <Textarea
             id="message"
             value={formData.message}
             onChange={(e) => setFormData({ ...formData, message: e.target.value })}
             required
             rows={4}
-            placeholder="Опишите ваш проект..."
+            placeholder={formContent?.messagePlaceholder || "Опишите ваш проект..."}
             data-testid="textarea-message"
           />
         </div>
-        <Button 
-          type="submit" 
+        <Button
+          type="submit"
           className="w-full"
           disabled={isSubmitting}
           data-testid="button-submit"
         >
-          {isSubmitting ? "Отправка..." : "Отправить заявку"}
+          <EditableContent
+            id="contact-form-submitButton"
+            defaultContent="Отправить заявку"
+            tag="span"
+            isEditable={isEditingMode}
+          />
         </Button>
       </form>
     </div>

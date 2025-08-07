@@ -1,35 +1,36 @@
 import { Button } from "@/components/ui/button";
+import { Category } from "@shared/schema";
 
 interface GalleryFilterProps {
   activeFilter: string;
   onFilterChange: (filter: string) => void;
+  categories: Category[];
 }
 
-export function GalleryFilter({ activeFilter, onFilterChange }: GalleryFilterProps) {
-  const filters = [
-    { id: "all", label: "Все работы" },
-    { id: "restoration", label: "Реставрация" },
-    { id: "art", label: "Арт-объекты" },
-    { id: "custom", label: "На заказ" },
-  ];
-
+export function GalleryFilter({ activeFilter, onFilterChange, categories }: GalleryFilterProps) {
   return (
-    <div className="flex flex-wrap justify-center gap-4 mb-12">
-      {filters.map((filter) => (
+    <div className="flex justify-center mb-8">
+      <div className="flex flex-wrap gap-2">
         <Button
-          key={filter.id}
-          onClick={() => onFilterChange(filter.id)}
-          variant={activeFilter === filter.id ? "default" : "outline"}
-          className={`px-6 py-2 rounded-full transition-all ${
-            activeFilter === filter.id
-              ? "bg-primary text-white hover:bg-primary/90"
-              : "bg-white text-primary border-primary hover:bg-primary hover:text-white"
-          }`}
-          data-testid={`filter-${filter.id}`}
+          variant={activeFilter === "all" ? "default" : "outline"}
+          onClick={() => onFilterChange("all")}
+          className="px-4 py-2"
+          data-testid="filter-all"
         >
-          {filter.label}
+          Все
         </Button>
-      ))}
+        {categories.map((category) => (
+          <Button
+            key={category.id}
+            variant={activeFilter === category.slug ? "default" : "outline"}
+            onClick={() => onFilterChange(category.slug)}
+            className="px-4 py-2"
+            data-testid={`filter-${category.slug}`}
+          >
+            {category.name}
+          </Button>
+        ))}
+      </div>
     </div>
   );
 }

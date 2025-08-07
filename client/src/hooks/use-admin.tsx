@@ -9,14 +9,7 @@ export function useAdmin() {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Проверяем localStorage для временного входа
-    const savedAdmin = localStorage.getItem('isAdmin');
-    if (savedAdmin === 'true') {
-      setIsAdmin(true);
-      setIsLoading(false);
-      return;
-    }
-
+    // There is no more temporary localStorage check, as we are relying solely on Firebase authentication.
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setIsAdmin(!!user);
       setIsLoading(false);
@@ -26,17 +19,6 @@ export function useAdmin() {
   }, []);
 
   const signIn = async (email: string, password: string) => {
-    // Временный вход для демонстрации (без Firebase)
-    if (email === "admin@example.com" && password === "admin123") {
-      setIsAdmin(true);
-      localStorage.setItem('isAdmin', 'true');
-      toast({
-        title: "Успешный вход",
-        description: "Добро пожаловать в админ панель",
-      });
-      return true;
-    }
-
     try {
       await signInWithEmailAndPassword(auth, email, password);
       toast({
@@ -47,7 +29,7 @@ export function useAdmin() {
     } catch (error) {
       toast({
         title: "Ошибка входа",
-        description: "Попробуйте: admin@example.com / admin123 или настройте Firebase",
+        description: "Неверный email или пароль",
         variant: "destructive",
       });
       return false;
@@ -56,22 +38,18 @@ export function useAdmin() {
 
   const signOutAdmin = async () => {
     try {
-      // Очищаем локальное сохранение
-      localStorage.removeItem('isAdmin');
-      setIsAdmin(false);
-      
       await signOut(auth);
+      setIsAdmin(false);
       toast({
         title: "Выход выполнен",
         description: "Вы вышли из админ панели",
       });
     } catch (error) {
-      // Даже если Firebase выход не сработал, очищаем локальное состояние
-      localStorage.removeItem('isAdmin');
       setIsAdmin(false);
       toast({
-        title: "Выход выполнен",
-        description: "Вы вышли из админ панели",
+        title: "Ошибка выхода",
+        description: "Не удалось выйти из системы. Попробуйте еще раз.",
+        variant: "destructive",
       });
     }
   };
