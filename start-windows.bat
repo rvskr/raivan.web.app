@@ -19,9 +19,13 @@ call npm install
 
 echo.
 echo Starting development server...
-echo Open http://localhost:5000 in your browser
+echo.
+echo Windows compatibility mode enabled
+echo Server will bind to localhost instead of 0.0.0.0
+echo.
+echo After server starts, open: http://localhost:5000
 echo Login as admin: admin@example.com / admin123
 echo.
 
 set NODE_ENV=development
-npx tsx server/index.ts
+npx cross-env NODE_ENV=development tsx server/index.ts

@@ -19,9 +19,12 @@ npm install
 
 Write-Host ""
 Write-Host "Starting development server..." -ForegroundColor Green
-Write-Host "Open http://localhost:5000 in your browser" -ForegroundColor Cyan
+Write-Host "Windows compatibility mode enabled" -ForegroundColor Yellow
+Write-Host "Server will bind to localhost instead of 0.0.0.0" -ForegroundColor Yellow
+Write-Host ""
+Write-Host "After server starts, open: http://localhost:5000" -ForegroundColor Cyan
 Write-Host "Login as admin: admin@example.com / admin123" -ForegroundColor Cyan
 Write-Host ""
 
 $env:NODE_ENV = "development"
-npx tsx server/index.ts
+npx cross-env NODE_ENV=development tsx server/index.ts
